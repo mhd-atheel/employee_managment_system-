@@ -1,6 +1,7 @@
 import 'package:employee_managment_system/adminpages/homepage.dart';
 import 'package:employee_managment_system/employeepages/employee_home.dart';
 import 'package:employee_managment_system/main_navigation_pages/deparmentpage.dart';
+import 'package:employee_managment_system/selectingrole.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -151,6 +152,18 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width,
                       child: Center(child: Text("Login")))),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("You are new /Admin/HR/Boss"),
+                TextButton(onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SelectRole()),
+                  );
+                }, child: Text("SignUp"))
+              ],
+            )
           ],
         ),
       ),

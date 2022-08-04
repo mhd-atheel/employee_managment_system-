@@ -31,7 +31,18 @@ class _SelectRoleState extends State<SelectRole> {
             Functions.SelectedRoleContainer("I am a New Business man / Admin / HR / Boss", AddNewAdmin(),context,0),
             Functions.SelectedRoleContainer("Sign in as Admin", LoginPage(),context,0),
             Functions.SelectedRoleContainer("Sign in as Emaployee", LoginPage(),context,1),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("If you have an account"),
+               TextButton(onPressed: (){
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(builder: (context) => const LoginPage()),
+                 );
+               }, child: Text("Login"))
+              ],
+            )
           ],
         ),
 
