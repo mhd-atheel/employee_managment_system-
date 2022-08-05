@@ -10,6 +10,7 @@ import '../adminpages/leaverequest.dart';
 import '../functions.dart';
 import '../main_navigation_pages/deparmentpage.dart';
 import '../main_navigation_pages/staffpage.dart';
+import '../myprofile.dart';
 
 class EmployeeHome extends StatefulWidget {
   const EmployeeHome({Key? key}) : super(key: key);
@@ -37,7 +38,12 @@ class _EmployeeHomeState extends State<EmployeeHome> {
             ),
             IconButton(
               icon: Image.network('https://www.pngplay.com/wp-content/uploads/12/User-Avatar-Profile-Clip-Art-Transparent-PNG.png'),
-              onPressed:() {},
+              onPressed:() {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyProfile()),
+                );
+              },
             ),
           ],
         ),

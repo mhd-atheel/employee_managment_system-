@@ -1,3 +1,6 @@
+import 'package:country_pickers/country.dart';
+import 'package:country_pickers/country_picker_dropdown.dart';
+import 'package:country_pickers/utils/utils.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -416,6 +419,33 @@ class _AddNewStaffState extends State<AddNewStaff> {
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  height: 50,
+                  width:MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),),
+                  child: CountryPickerDropdown(
+                    isExpanded: true,
+                    initialValue: 'LK',
+                    itemBuilder: _buildDropdownItem,
+                    //   itemFilter:  ['AR', 'DE', 'GB', 'CN'].contains(c.isoCode),
+                    priorityList:[
+                      CountryPickerUtils.getCountryByIsoCode('GB'),
+                      CountryPickerUtils.getCountryByIsoCode('CN'),
+
+                    ],
+                    sortComparator: (Country a, Country b) => a.isoCode.compareTo(b.isoCode),
+
+                    onValuePicked: (Country country) {
+                      print("${country.name} ,(${country.isoCode})");
+                    },
+                  ),
+                ),
+              ),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -471,3 +501,14 @@ class _AddNewStaffState extends State<AddNewStaff> {
     );
   }
 }
+Widget _buildDropdownItem(Country country) => Container(
+
+  child: Row(
+    children: <Widget>[
+      SizedBox(width: 5,),
+      CountryPickerUtils.getDefaultFlagImage(country),
+      SizedBox(width: 5,),
+      Text("(${country.name})",style: TextStyle(fontSize: 15),overflow: TextOverflow.ellipsis,),
+    ],
+  ),
+);

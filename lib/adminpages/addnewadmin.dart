@@ -58,6 +58,34 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                   SizedBox(width: 20,),
                   Text("Add Admin Profile")
                 ],
+              ),              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Text("Company Name:-"),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextFormField(
+                  onChanged: (val){print(val);},
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black,
+
+                      ),
+                    ),
+                  ),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -179,7 +207,6 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     Container(
                       height: 50,
                       width: MediaQuery.of(context).size.width/2.2,
