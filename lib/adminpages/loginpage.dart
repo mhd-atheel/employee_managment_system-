@@ -1,8 +1,8 @@
 import 'package:employee_managment_system/adminpages/homepage.dart';
 import 'package:employee_managment_system/employeepages/employee_home.dart';
-import 'package:employee_managment_system/main_navigation_pages/deparmentpage.dart';
 import 'package:employee_managment_system/selectingrole.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import '../functions.dart';
@@ -17,7 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String email = '';
   String password = '';
-
+  DatabaseReference ref =FirebaseDatabase.instance.ref();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -126,9 +126,15 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.symmetric(vertical: 5.0,horizontal: 20.0),
               child: ElevatedButton(
                   onPressed: () async {
+
                     if(Functions.index == 0){
                       FirebaseAuth login = FirebaseAuth.instance;
                       login.createUserWithEmailAndPassword(email: email, password: password);
+                      ref.child("users").set({
+                        'email':email,
+                        'password':password,
+
+                      });
                     await  Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
