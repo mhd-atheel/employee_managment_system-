@@ -1,6 +1,12 @@
 import 'package:badges/badges.dart';
+import 'package:employee_managment_system/adminpages/loginpage.dart';
 import 'package:employee_managment_system/functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'data.dart';
 
 class MyProfile extends StatefulWidget {
   const MyProfile({Key? key}) : super(key: key);
@@ -10,6 +16,37 @@ class MyProfile extends StatefulWidget {
 }
 
 class _MyProfileState extends State<MyProfile> {
+  
+  FirebaseAuth auth = FirebaseAuth.instance;
+  @override
+  void initState() {
+   DatabaseReference database = FirebaseDatabase.instance.ref();
+   Data.newadminuuid = auth.currentUser!.uid;
+   database.child('admin').child(Data.newadminuuid).child('personalDetails').once().then((value) {
+     Map myData = value.snapshot.value as Map;
+     print(myData);
+     setState(() {
+       adminname = myData['adminName'];
+       email = myData['email'];
+       companyName = myData['companyName'];
+       mobileNumber = myData['mobileNumber'];
+       address = myData['address'];
+       country = myData['country'];
+       dob = myData['dob'];
+       gender = myData['gender'];
+     });
+   });
+  }
+  String companyName = '';
+  String adminname = '';
+  String email = '';
+  String mobileNumber = '';
+  String address = '';
+  String country = '';
+  String dob = '';
+  String gender = '';
+
+  
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -18,6 +55,20 @@ class _MyProfileState extends State<MyProfile> {
           title: Text("My Profile"),
           foregroundColor: Colors.black,
           backgroundColor: Colors.white,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton(onPressed: (){
+                 auth.signOut().then((value) {
+                   print("Sign out");
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(builder: (context) => const LoginPage()),
+                   );
+                 });
+              }, icon: Icon(FontAwesomeIcons.rightFromBracket),color: Colors.red,),
+            )
+          ],
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -34,7 +85,7 @@ class _MyProfileState extends State<MyProfile> {
                   Column(
                     children: [
                       Text(
-                        "Mohamed Atheel".toUpperCase(),style: TextStyle(
+                        adminname.toUpperCase(),style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600
                       ),),
@@ -57,13 +108,13 @@ class _MyProfileState extends State<MyProfile> {
                 ],
               ),
               SizedBox(height: 15),
-              Functions.MyProfileContainer(context,"Company Name","atheel's (Pvt) limited"),
-              Functions.MyProfileContainer(context,"Email","aathilmazz1234@gmail.com"),
-              Functions.MyProfileContainer(context,"Mobile Number","+94 750755684"),
-              Functions.MyProfileContainer(context,"Address","24/15 A 1ST CROSS STREET,THILLAYA,Puttalam"),
-              Functions.MyProfileContainer(context,"Country","Sri Lanka"),
-              Functions.MyProfileContainer(context,"Date of Birth","2001/04/29"),
-              Functions.MyProfileContainer(context,"Gender","Male"),
+              Functions.MyProfileContainer(context,"Company Name",companyName),
+              Functions.MyProfileContainer(context,"Email",email),
+              Functions.MyProfileContainer(context,"Mobile Number",mobileNumber),
+              Functions.MyProfileContainer(context,"Address",address),
+              Functions.MyProfileContainer(context,"Country",country),
+              Functions.MyProfileContainer(context,"Date of Birth",dob),
+              Functions.MyProfileContainer(context,"Gender",gender),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 8.0),
                 child: ElevatedButton(

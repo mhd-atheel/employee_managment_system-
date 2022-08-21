@@ -1,12 +1,18 @@
+import 'dart:ffi';
+
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/utils/utils.dart';
 import 'package:date_time_picker/date_time_picker.dart';
+import 'package:employee_managment_system/main_navigation_pages/staffpage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../adminpages/resource.dart';
+import '../data.dart';
 import '../functions.dart';
 
 class AddNewStaff extends StatefulWidget {
@@ -17,27 +23,63 @@ class AddNewStaff extends StatefulWidget {
 }
 
 class _AddNewStaffState extends State<AddNewStaff> {
-  List<DropdownMenuItem<String>>menuItems =[];
-  XFile? image;
 
-  @override
-  void initState() {
-    Resource.DepName.forEach((element) {
-      menuItems.add(DropdownMenuItem(
-          child: Text(element[0]),
-        value: element[0],
-      )
-      );
-    });
-    super.initState();
-  }
-  String selectedValue = Resource.DepName.first[0];
-  String dropdownvalue = 'Male';
+  XFile? image;
+  TextEditingController staffNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
+  TextEditingController salaryController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  String country = "Sri Lanka";
+  String gender = "Male";
+  String dob = "";
+  String department = '';
+  String type = "Per day";
+  Map departments = {} ;
+  List keys = [];
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  FirebaseAuth auth = FirebaseAuth.instance;
+ // @override
+  // void initState() {
+  //   Resource.DepName.forEach((element) {
+  //     menuItems.add(DropdownMenuItem(
+  //         child: Text(element[0]),
+  //       value: element[0],
+  //     )
+  //     );
+  //   });
+  //   super.initState();
+  // }
+  // String selectedValue = Resource.DepName.first[0];
+   String dropdownvalue = 'Male';
   var items = [
     'Male',
     'Female',
     'Other',
   ];
+  load() {
+    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    ref
+        .child('admin')
+        .child(Data.newadminuuid)
+        .child('departments')
+        .once()
+        .then((value) {
+      setState(() {
+        departments = value.snapshot.value as Map;
+        keys = departments.keys.toList();
+      });
+      print(value.snapshot.value);
+      print(keys);
+    });
+  }
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -84,6 +126,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 child: TextFormField(
                   onChanged: (val){print(val);},
                   cursorColor: Colors.black,
+                  controller: staffNameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
@@ -111,35 +154,35 @@ class _AddNewStaffState extends State<AddNewStaff> {
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Container(
-                  height: 50,
+                  height: 60,
+                  width:MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
                     border: Border.all(),
-                    borderRadius: BorderRadius.circular(5)
-                  ),
+                   // color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropdownButton(
+                     dropdownColor: Colors.white,
+                      underline: DropdownButtonHideUnderline(child: Container()),
+                      value: dropdownvalue,
+                      iconDisabledColor: Colors.transparent,
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      isExpanded: true,
+                      items: items.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
 
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DropdownButton<String>(
-                        icon: Icon(Icons.keyboard_arrow_down_rounded),
-                          // underline: DropdownButtonHideUnderline(child: Container()),
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black
-                        ),
-                        isExpanded: true,
-                        value: selectedValue,
-                        underline: DropdownButtonHideUnderline(child: Container()),
-                      onChanged: (String? val){
-                        print(val);
+                        );
+                      }).toList(),
+                      onChanged: (String? Value) {
                         setState(() {
-                          selectedValue = val!;
+                          dropdownvalue = Value!;
+                          gender = Value;
+                          print(Value);
                         });
                       },
-                      items: menuItems
-                        ,
-
-       ),
                     ),
                   ),
                 ),
@@ -156,6 +199,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 padding: const EdgeInsets.all(10.0),
                 child: TextFormField(
                   onChanged: (val){print(val);},
+                  controller: emailController,
                   keyboardType:TextInputType.emailAddress,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
@@ -187,6 +231,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 child: TextFormField(
                   onChanged: (val){print(val);},
                   keyboardType: TextInputType.phone,
+                  controller: mobileController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -257,7 +302,9 @@ class _AddNewStaffState extends State<AddNewStaff> {
                       dateHintText: "DD,MM,YYYY",
                       timeFieldWidth: 20,
                       //dateLabelText: 'YYYY',
-                      //onChanged: (val) => print(val),
+                      onChanged: (val){
+                        dob = val;
+                      },
                       validator: (val) {
                         print(val);
                         return null;
@@ -282,7 +329,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                           value: dropdownvalue,
                           iconDisabledColor: Colors.transparent,
                           icon: const Icon(Icons.keyboard_arrow_down),
-                        //  isExpanded: true,
+                          isExpanded: true,
                           items: items.map((String items) {
                             return DropdownMenuItem(
                               value: items,
@@ -293,6 +340,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                           onChanged: (String? Value) {
                             setState(() {
                               dropdownvalue = Value!;
+                              gender = Value;
                               print(Value);
                             });
                           },
@@ -343,6 +391,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 10),
                         child: TextFormField(
+                          controller: salaryController,
                           keyboardType: TextInputType.number,
                            decoration: InputDecoration(
                                focusedBorder: InputBorder. none,
@@ -440,8 +489,8 @@ class _AddNewStaffState extends State<AddNewStaff> {
                     ],
                     sortComparator: (Country a, Country b) => a.isoCode.compareTo(b.isoCode),
 
-                    onValuePicked: (Country country) {
-                      print("${country.name} ,(${country.isoCode})");
+                    onValuePicked: (Country ) {
+                      country=Country.name;
                     },
                   ),
                 ),
@@ -460,6 +509,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 child: TextFormField(
                   maxLines: 4,
                   onChanged: (val){print(val);},
+                  controller: addressController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -481,7 +531,22 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 8.0),
                 child: ElevatedButton(
                     onPressed: () {
-                      print("pressed");
+                      Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+                      ref.child('admin').child(Data.newadminuuid).child('staffs').push().set({
+                        'staffName':staffNameController.text,
+                        'email':emailController.text,
+                        'mobileNumber':mobileController.text,
+                        'address':addressController.text,
+                        'department':department,
+                        'dob':dob,
+                        'gender':gender,
+                        'salary':salaryController.text,
+                        'country':country,
+                        'type': Functions.index == 0 ?type = "Per day":type="Per Month"
+                      }).then((value) {
+                        Navigator.pop(context);
+                      });
+                      print("presseds");
                       },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.black),

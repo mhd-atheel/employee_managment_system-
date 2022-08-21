@@ -1,15 +1,15 @@
-
-
-
+import 'dart:io';
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/utils/utils.dart';
 import 'package:date_time_picker/date_time_picker.dart';
+import 'package:employee_managment_system/adminpages/homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../data.dart';
 
@@ -22,10 +22,11 @@ class AddNewAdmin extends StatefulWidget {
 
 class _AddNewAdminState extends State<AddNewAdmin> {
   XFile? image;
+  File? file;
   String dropdownvalue = 'Male';
    String dob = '';
   String country = 'Sri lanka' ;
-  late String gender ;
+  String gender= '' ;
   var items = [
     'Male',
     'Female',
@@ -78,6 +79,10 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                       onPressed: () async {
                         ImagePicker _picker = ImagePicker();
                         image = await _picker.pickImage(source: ImageSource.gallery);
+                        file = File(image!.path);
+                         // await _firebaseStorage.ref()
+                         //    .child('images/imageName')
+                         //    .putFile(file).onComplete;
                       },
                       child: CircleAvatar(
                         radius: 40,
@@ -155,8 +160,17 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
-                      Text("Email:-"),
-                      Text(errorMessage)
+                      Text("Email:-",style: TextStyle(
+                        color: errorMessage ==true? Colors.red:Colors.black
+                      ),),
+                      SizedBox(width: 5,),
+                      Expanded(
+                        child: Text(errorMessage.toUpperCase(),style:TextStyle(
+                          fontSize: 10,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold
+                        ),),
+                      )
                     ],
                   ),
                 ),
@@ -420,11 +434,11 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                         try  {
                           if(_key.currentState!.validate()){
                             FirebaseAuth auth = FirebaseAuth.instance;
-                            auth.createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text).then((value) {
+                           await auth.createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text).then((value) {
                               print("Success");
                             });
                            Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
-                            ref.child('admin').child(Data.newadminuuid).set({
+                           await ref.child('admin').child(Data.newadminuuid).child('personalDetails').set({
                               'companyName':companyNameController.text,
                               'adminName':adminNameController.text,
                               'email':emailController.text,
@@ -435,7 +449,13 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                               'country':country,
                               'address':addressController.text,
 
-                            });
+                            }).then((value) {
+                             Navigator.push(
+                               context,
+                               MaterialPageRoute(builder: (context) => const HomePage()),
+                             );
+
+                           });
 
                           }
 

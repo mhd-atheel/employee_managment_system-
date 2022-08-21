@@ -1,5 +1,7 @@
-
+import 'package:employee_managment_system/data.dart';
 import 'package:employee_managment_system/main_navigation_pages/addnewstaff.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -14,6 +16,32 @@ class StaffPage extends StatefulWidget {
 }
 
 class _StaffPageState extends State<StaffPage> {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  Map staffs = {};
+  List keys = [];
+  load() {
+    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    ref
+        .child('admin')
+        .child(Data.newadminuuid)
+        .child('staffs')
+        .once()
+        .then((value) {
+      setState(() {
+        staffs = value.snapshot.value as Map;
+        keys = staffs.keys.toList();
+      });
+      print(keys);
+    });
+  }
+
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -33,14 +61,31 @@ class _StaffPageState extends State<StaffPage> {
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
         ),
-       body: Column(
-         children: [
-           SizedBox(height: 10,),
-          // Functions.StaffContainer(context)
-           for(int i=0;i<Resource.StaffInfo.length;i++)
-             Functions.StaffContainer(context,Resource.StaffInfo[i][0],Resource.StaffInfo[i][1],Resource.StaffInfo[i][2],Resource.StaffInfo[i][3],Resource.StaffInfo[i][4],Resource.StaffInfo[i][5],Resource.StaffInfo[i][6],Resource.StaffInfo[i][7],Resource.StaffInfo[i][8],Resource.StaffInfo[i][9])
-         ],
-       ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              // Functions.StaffContainer(context)
+              for (int i = 0; i < keys.length; i++)
+                // for(int i=0;i<Resource.StaffInfo.length;i++)
+                Functions.StaffContainer(
+                    context,
+                    staffs[keys[i]]['staffName'].toString(),
+                    staffs[keys[i]]['department'].toString(),
+                    staffs[keys[i]]['email'].toString(),
+                    staffs[keys[i]]['gender'].toString(),
+                    staffs[keys[i]]['address'].toString(),
+                    staffs[keys[i]]['country'].toString(),
+                    staffs[keys[i]]['dob'].toString(),
+                    staffs[keys[i]]['mobileNumber'].toString(),
+                    staffs[keys[i]]['salary'].toString(),
+                    staffs[keys[i]]['type'].toString(),
+                )
+            ],
+          ),
+        ),
       ),
     );
   }

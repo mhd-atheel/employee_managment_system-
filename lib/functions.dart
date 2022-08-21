@@ -192,7 +192,7 @@ class Functions {
           )),
     );
   }
-  static DeparmentContainer(context, depName, index) {
+  static DeparmentContainer(context, depName, index,) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
@@ -252,7 +252,7 @@ class Functions {
                             borderRadius: BorderRadius.all(Radius.circular(0))),
                       ),
                       onPressed: () {
-                        print('Pressed');
+
                       },
                     ),
                   ),
@@ -285,7 +285,7 @@ class Functions {
       ),
     );
   }
-  static StaffContainer(context, image, staffname, depname, email, gender, address, dob, mobile,salary,type) {
+  static StaffContainer(context,staffname, depname, email, gender, address ,country, dob, mobile,salary,type) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
@@ -311,7 +311,7 @@ class Functions {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage(image),
+                            backgroundImage: NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS785biEGWYfQ3kCbvts_QRuNPn7IJpvovN4A&usqp=CAU'),
                           )
                         ],
                       ),
@@ -433,9 +433,20 @@ class Functions {
                     Text(
                       "ADDRESS : ",
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     Expanded(child: Text(address))
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "COUNTRY : ",
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    Expanded(child: Text(country))
                   ],
                 ),
                 Row(
@@ -461,11 +472,11 @@ class Functions {
                 Row(
                   children: [
                     Text(
-                      "SALARY : ",
+                      "SALARY :",
                       style:
                       TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
-                    Text(salary)
+                    Text(salary+ " \$")
                   ],
                 ),
                 Row(

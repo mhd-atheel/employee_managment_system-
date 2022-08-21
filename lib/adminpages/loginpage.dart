@@ -158,10 +158,17 @@ class _LoginPageState extends State<LoginPage> {
                             email: emailController.text,
                             password: passwordController.text,
                           ).then((value) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HomePage()),
+                            );
                             print("Login SuccessFully");
                           });}
                           else{
-                            print("This is index ==1 ");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const EmployeeHome()),
+                            );
                           }
                           errorMessage = '';
                         } on FirebaseAuthException catch (error) {

@@ -1,8 +1,12 @@
+import 'package:employee_managment_system/data.dart';
 import 'package:employee_managment_system/functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../adminpages/resource.dart';
+import 'moreinfo.dart';
 
 class DepartmentPage extends StatefulWidget {
   const DepartmentPage({Key? key}) : super(key: key);
@@ -12,36 +16,177 @@ class DepartmentPage extends StatefulWidget {
 }
 
 class _DepartmentPageState extends State<DepartmentPage> {
+  TextEditingController departmentcontroller = TextEditingController();
+  FirebaseAuth auth = FirebaseAuth.instance;
+  DatabaseReference database = FirebaseDatabase.instance.ref();
+  Map departments = {};
+  List keys = [];
+  bool isLoading = false;
+  load() {
+    database
+        .child('admin')
+        .child(Data.newadminuuid)
+        .child('departments')
+        .once()
+        .then((value) {
+      setState(() {
+        departments = value.snapshot.value as Map;
+        keys = departments.keys.toList();
+      });
+      print(value.snapshot.value);
+      print(keys);
+    });
+  }
+
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              // Add your onPressed code here!
-              _showDialog(context);
-            },
-            backgroundColor: Colors.black,
-            child: const FaIcon(FontAwesomeIcons.plus),
-          ),
-          appBar: AppBar(
-            title: Text('DEPARMENTS'),
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                for(int i=0;i<Resource.DepName.length;i++)
-                  Functions.DeparmentContainer(context,Resource.DepName[i][0],i+1)
-              ],
-            ),
-          ),
-        )
-    );
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add your onPressed code here!
+          _showDialog(context);
+        },
+        backgroundColor: Colors.black,
+        child: const FaIcon(FontAwesomeIcons.plus),
+      ),
+      appBar: AppBar(
+        title: Text('DEPARMENTS'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // for(int i=0;i<keys.length;i++)
+            //   Row(
+            //     children: [
+            //       Text(departments[keys[i]]['deparment'].toString()),
+            //       ElevatedButton(onPressed: (){
+            //         database.child('admin').child(Data.newadminuuid).child('departments').child(keys[i]).set(null).then((value) {
+            //           load();
+            //         });
+            //       }, child: Icon(FontAwesomeIcons.trash))
+            //     ],
+            //   )
+            for (int i = 0; i < keys.length; i++)
+              //   Functions.DeparmentContainer(context,departments[keys[i]]['deparment'].toString(),i+1)
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(5)),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              departments[keys[i]]['department'].toString(),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              i.toString(),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              child: TextButton(
+                                child: Text('Edit'),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.white,
+                                  //  padding: EdgeInsets.only(top: 2, bottom: 30, right: 0, left: 0),
+                                  backgroundColor: Color(0xff519557),
+                                  shape: const BeveledRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(3))),
+                                ),
+                                onPressed: () {
+                                  print('Pressed');
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              child: TextButton(
+                                child: Text('Delete'),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.white,
+                                  backgroundColor: Color(0xffF14B4B),
+                                  shape: const BeveledRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(0))),
+                                ),
+                                onPressed: () {
+                                  database
+                                      .child('admin')
+                                      .child(Data.newadminuuid)
+                                      .child('departments')
+                                      .child(keys[i])
+                                      .set(null)
+                                      .then((value) {
+                                    load();
+                                  });
+
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              child: TextButton(
+                                child: Center(child: Text('More')),
+                                style: TextButton.styleFrom(
+                                  primary: Colors.white,
+                                  backgroundColor: Color(0xffFA8C5E),
+                                  shape: const BeveledRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                          bottomRight: Radius.circular(3))),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MoreInfo()),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              )
+          ],
+        ),
+      ),
+    ));
   }
-  void _showDialog(BuildContext context) {
+
+  _showDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -58,53 +203,76 @@ class _DepartmentPageState extends State<DepartmentPage> {
                 height: 200,
                 width: 500,
                 color: Colors.white,
-                child:Column(
+                child: Column(
                   children: [
                     TextFormField(
-
+                      controller: departmentcontroller,
                       decoration: InputDecoration(
-
                         border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.deepPurpleAccent)),
+                            borderSide:
+                                BorderSide(color: Colors.deepPurpleAccent)),
                         hintText: 'Add Department',
                       ),
-                      onChanged: (val) {
-
-                      },
+                      onChanged: (val) {},
                     ),
-                    SizedBox(height: 15,),
+                    SizedBox(
+                      height: 15,
+                    ),
                     Row(
                       children: [
-                        Expanded(child: ElevatedButton(
-                            onPressed: (){},
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Text("Submit"),
-                            ))),
+                        Expanded(
+                            child: ElevatedButton(
+                                onPressed: () async {
+                                  Data.newadminuuid = auth.currentUser!.uid;
+                                  await database
+                                      .child('admin')
+                                      .child(Data.newadminuuid)
+                                      .child('departments')
+                                      .push()
+                                      .set({
+                                    'department': departmentcontroller.text,
+                                  }).then((value) async {
+                                    Navigator.pop(context);
+                                    load();
+                                  });
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.black),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text("Submit"),
+                                ))),
                       ],
                     ),
-                    SizedBox(height:10 ,),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       children: [
-                        Expanded(child: ElevatedButton(
-                            onPressed: (){},
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                              foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Text("Cancel"),
-                            ))),
+                        Expanded(
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.white),
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.black),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text("Cancel"),
+                                ))),
                       ],
                     ),
-
                   ],
-                ) ,
+                ),
               ),
             )
           ],
