@@ -32,6 +32,9 @@ class _AddNewAdminState extends State<AddNewAdmin> {
     'Female',
     'Other',
   ];
+  File? _image;
+  final imagePicker = ImagePicker();
+  String? downloadURL;
   DatabaseReference ref  = FirebaseDatabase.instance.ref();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -51,6 +54,35 @@ class _AddNewAdminState extends State<AddNewAdmin> {
       backgroundColor: Colors.amberAccent,
 
     );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+  Future ImagePickerMethod() async{
+    final pick =await imagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      if(pick != null){
+        _image = File(pick.path);
+      }
+      else{
+        showSnackBars("No File Selected", Duration(milliseconds: 400));
+      }
+    });
+  }
+  Future uploadImage() async {
+    final  posttime = DateTime.now().millisecondsSinceEpoch.toString();
+    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    Reference ref = FirebaseStorage.instance.ref().child(Data.newadminuuid).child(posttime);
+    await ref.putFile(_image!);
+    downloadURL = await ref.getDownloadURL();
+    DatabaseReference database = FirebaseDatabase.instance.ref();
+    database.child('admin').child(Data.newadminuuid).child('images').set({
+      'downloadurl': downloadURL
+    });
+    print(downloadURL);
+  }
+
+
+  showSnackBars(String SnackText,Duration d){
+    final snackBar = SnackBar(content: Text(SnackText),duration: d,);
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -77,20 +109,38 @@ class _AddNewAdminState extends State<AddNewAdmin> {
 
                     TextButton(
                       onPressed: () async {
-                        ImagePicker _picker = ImagePicker();
-                        image = await _picker.pickImage(source: ImageSource.gallery);
-                        file = File(image!.path);
+                        ImagePickerMethod();
+                        // ImagePicker _picker = ImagePicker();
+                        // image = await _picker.pickImage(source: ImageSource.gallery);
+                        // file = File(image!.path);
                          // await _firebaseStorage.ref()
                          //    .child('images/imageName')
                          //    .putFile(file).onComplete;
                       },
-                      child: CircleAvatar(
+                      child: _image == null?CircleAvatar(
                         radius: 40,
                         child: FaIcon(FontAwesomeIcons.userPlus),
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
+                      ):CircleAvatar(
+                        radius: 40,
+                          backgroundColor: Colors.transparent,
+                          child: ClipOval(
+                            child: Image.file(_image!),
+                          )
                       ),
+                      // CircleAvatar(
+                      //   radius: 40,
+                      //   child:ClipRRect(
+                      //
+                      //    child: Image.file(_image!),
+                      //     //borderRadius: BorderRadius.circular(50.0),
+                      //   ),
+                      //
+                      // ),
                     ),
+
+
                     SizedBox(width: 20,),
                     Text("Add Admin Profile")
                   ],
@@ -342,7 +392,7 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                             value: dropdownvalue,
                             iconDisabledColor: Colors.transparent,
                             icon: const Icon(Icons.keyboard_arrow_down),
-                            //  isExpanded: true,
+                             isExpanded: true,
                             items: items.map((String items) {
                               return DropdownMenuItem(
                                 value: items,
@@ -456,6 +506,7 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                              );
 
                            });
+                           await uploadImage();
 
                           }
 

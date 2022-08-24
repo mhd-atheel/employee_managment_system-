@@ -16,7 +16,7 @@ class MyProfile extends StatefulWidget {
 }
 
 class _MyProfileState extends State<MyProfile> {
-  
+  String imageURL = "" ;
   FirebaseAuth auth = FirebaseAuth.instance;
   @override
   void initState() {
@@ -36,7 +36,15 @@ class _MyProfileState extends State<MyProfile> {
        gender = myData['gender'];
      });
    });
+   Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+   database.child('admin').child(Data.newadminuuid).child('images').once().then((value) {
+     Map myData = value.snapshot.value as Map;
+     setState(() {
+       imageURL = myData['downloadurl'];
+     });
+   });
   }
+
   String companyName = '';
   String adminname = '';
   String email = '';
@@ -79,7 +87,14 @@ class _MyProfileState extends State<MyProfile> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    child: Image.asset('assets/images/profile.png'),
+                    backgroundColor: Colors.transparent,
+                    child: ClipOval(
+                      child:  imageURL.isEmpty ?CircularProgressIndicator(
+                        value: 0.8,
+                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
+                      ):
+                      Image.network(imageURL),
+                    ),
                   ),
                   SizedBox(width: 10,),
                   Column(

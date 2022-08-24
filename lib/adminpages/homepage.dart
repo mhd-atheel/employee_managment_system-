@@ -7,10 +7,13 @@ import 'package:employee_managment_system/main_navigation_pages/leave%20page.dar
 import 'package:employee_managment_system/main_navigation_pages/salary%20page.dart';
 import 'package:employee_managment_system/main_navigation_pages/staffpage.dart';
 import 'package:employee_managment_system/myprofile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../data.dart';
 import '../main_navigation_pages/deparmentpage.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,6 +24,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  FirebaseAuth auth = FirebaseAuth.instance;
+  String imageURL = "" ;
+  load(){
+    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    ref.child('admin').child(Data.newadminuuid).child('images').once().then((value) {
+      Map myData = value.snapshot.value as Map;
+      setState(() {
+        imageURL = myData['downloadurl'];
+      });
+    });
+  }
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -35,7 +55,11 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {},
             ),
             IconButton(
-              icon: Image.network('https://www.pngplay.com/wp-content/uploads/12/User-Avatar-Profile-Clip-Art-Transparent-PNG.png'),
+              icon: imageURL.isEmpty ?CircularProgressIndicator(
+                value: 0.8,
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
+              ):
+              Image.network(imageURL),
               onPressed:() {
                 Navigator.push(
                   context,
