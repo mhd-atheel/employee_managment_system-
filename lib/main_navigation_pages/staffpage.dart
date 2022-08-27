@@ -72,6 +72,7 @@ class _StaffPageState extends State<StaffPage> {
                 // for(int i=0;i<Resource.StaffInfo.length;i++)
                 Functions.StaffContainer(
                     context,
+                    staffs[keys[i]]['image'],
                     staffs[keys[i]]['staffName'].toString(),
                     staffs[keys[i]]['department'].toString(),
                     staffs[keys[i]]['email'].toString(),

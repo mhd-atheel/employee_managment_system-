@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
+import '../data.dart';
 import '../functions.dart';
 import '../adminpages/resource.dart';
 
@@ -11,6 +14,31 @@ class MoreInfo extends StatefulWidget {
 }
 
 class _MoreInfoState extends State<MoreInfo> {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  Map staffs = {};
+  List keys = [];
+  load() {
+    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    ref
+        .child('admin')
+        .child(Data.newadminuuid)
+        .child('staffs')
+        .once()
+        .then((value) {
+      setState(() {
+        staffs = value.snapshot.value as Map;
+        keys = staffs.keys.toList();
+      });
+      print(keys);
+    });
+  }
+
+  @override
+  void initState() {
+    load();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -25,7 +53,22 @@ class _MoreInfoState extends State<MoreInfo> {
               SizedBox(height: 10,),
               // Functions.StaffContainer(context)
               for(int i=0;i<Resource.StaffInfo.length;i++)
-                Functions.StaffContainer(context,Resource.StaffInfo[i][0],Resource.StaffInfo[i][1],Resource.StaffInfo[i][2],Resource.StaffInfo[i][3],Resource.StaffInfo[i][4],Resource.StaffInfo[i][5],Resource.StaffInfo[i][6],Resource.StaffInfo[i][7],Resource.StaffInfo[i][8],Resource.StaffInfo[i][9])
+                for (int i = 0; i < keys.length; i++)
+                // for(int i=0;i<Resource.StaffInfo.length;i++)
+                  Functions.StaffContainer(
+                    context,
+                    staffs[keys[i]]['image'],
+                    staffs[keys[i]]['staffName'].toString(),
+                    staffs[keys[i]]['department'].toString(),
+                    staffs[keys[i]]['email'].toString(),
+                    staffs[keys[i]]['gender'].toString(),
+                    staffs[keys[i]]['address'].toString(),
+                    staffs[keys[i]]['country'].toString(),
+                    staffs[keys[i]]['dob'].toString(),
+                    staffs[keys[i]]['mobileNumber'].toString(),
+                    staffs[keys[i]]['salary'].toString(),
+                    staffs[keys[i]]['type'].toString(),
+                  )
             ],
         ),
       ),

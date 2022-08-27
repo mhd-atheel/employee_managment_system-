@@ -88,13 +88,17 @@ class _MyProfileState extends State<MyProfile> {
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.transparent,
-                    child: ClipOval(
-                      child:  imageURL.isEmpty ?CircularProgressIndicator(
-                        value: 0.8,
-                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
-                      ):
-                      Image.network(imageURL),
-                    ),
+                    backgroundImage: NetworkImage(imageURL)
+
+                    //NetworkImage(imageURL),
+
+                    // child: ClipOval(
+                    //   child:  imageURL.isEmpty ?CircularProgressIndicator(
+                    //     value: 0.8,
+                    //     valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
+                    //   ):
+                    //   Image.network(imageURL),
+                    // ),
                   ),
                   SizedBox(width: 10,),
                   Column(

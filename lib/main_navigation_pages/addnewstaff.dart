@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dropdown.dart';
@@ -7,6 +8,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:employee_managment_system/main_navigation_pages/staffpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,6 +39,9 @@ class _AddNewStaffState extends State<AddNewStaff> {
   String type = "Per day";
   Map departments = {} ;
   List keys = [];
+  File? _image;
+  final imagePicker = ImagePicker();
+  String? downloadURL;
   DatabaseReference ref = FirebaseDatabase.instance.ref();
   FirebaseAuth auth = FirebaseAuth.instance;
  // @override
@@ -73,6 +78,35 @@ class _AddNewStaffState extends State<AddNewStaff> {
       print(keys);
     });
   }
+  Future ImagePickerMethod() async{
+    final pick =await imagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      if(pick != null){
+        _image = File(pick.path);
+      }
+      else{
+        showSnackBars("No File Selected", Duration(milliseconds: 400));
+      }
+    });
+  }
+  Future uploadImage() async {
+    final  posttime = DateTime.now().millisecondsSinceEpoch.toString();
+   // Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+    Reference ref = FirebaseStorage.instance.ref().child(Data.newadminuuid).child(posttime);
+    await ref.putFile(_image!);
+    downloadURL = await ref.getDownloadURL();
+    DatabaseReference database = FirebaseDatabase.instance.ref();
+    database.child('admin').child(Data.newadminuuid).child('staffprofileimage').set({
+      'downloadurl': downloadURL
+    });
+    print(downloadURL);
+  }
+
+
+  showSnackBars(String SnackText,Duration d){
+    final snackBar = SnackBar(content: Text(SnackText),duration: d,);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
   @override
   void initState() {
     load();
@@ -99,14 +133,19 @@ class _AddNewStaffState extends State<AddNewStaff> {
 
                   TextButton(
                     onPressed: () async {
-                      ImagePicker _picker = ImagePicker();
-                      image = await _picker.pickImage(source: ImageSource.gallery);
+                     ImagePickerMethod();
                       },
-                    child: CircleAvatar(
+                    child: _image == null?CircleAvatar(
                       radius: 40,
                       child: FaIcon(FontAwesomeIcons.userPlus),
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,
+                    ):CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.transparent,
+                        child: ClipOval(
+                          child: Image.file(_image!),
+                        )
                     ),
                   ),
                   SizedBox(width: 20,),
@@ -530,9 +569,19 @@ class _AddNewStaffState extends State<AddNewStaff> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 8.0),
                 child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async{
                       Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
-                      ref.child('admin').child(Data.newadminuuid).child('staffs').push().set({
+                      final  posttime = DateTime.now().millisecondsSinceEpoch.toString();
+                      // Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
+                      Reference database = FirebaseStorage.instance.ref().child(Data.newadminuuid).child('staffProfile').child(posttime);
+                      await database.putFile(_image!);
+                      downloadURL = await database.getDownloadURL();
+
+                      // database.child('admin').child(Data.newadminuuid).child('staffprofileimage').set({
+                      //   'downloadurl': downloadURL
+                      // });
+                      // print(downloadURL);
+                     await ref.child('admin').child(Data.newadminuuid).child('staffs').push().set({
                         'staffName':staffNameController.text,
                         'email':emailController.text,
                         'mobileNumber':mobileController.text,
@@ -542,11 +591,13 @@ class _AddNewStaffState extends State<AddNewStaff> {
                         'gender':gender,
                         'salary':salaryController.text,
                         'country':country,
-                        'type': Functions.index == 0 ?type = "Per day":type="Per Month"
+                        'type': Functions.index == 0 ?type = "Per day":type="Per Month",
+                        'image': downloadURL,
                       }).then((value) {
                         Navigator.pop(context);
                       });
                       print("presseds");
+                     await uploadImage();
                       },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.black),

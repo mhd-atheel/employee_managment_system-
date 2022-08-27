@@ -9,7 +9,7 @@ import 'package:employee_managment_system/main_navigation_pages/staffpage.dart';
 import 'package:employee_managment_system/myprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
       Map myData = value.snapshot.value as Map;
       setState(() {
         imageURL = myData['downloadurl'];
+        print(imageURL);
       });
     });
   }
@@ -54,18 +55,30 @@ class _HomePageState extends State<HomePage> {
               icon:const FaIcon(FontAwesomeIcons.bell),
               onPressed: () {},
             ),
-            IconButton(
-              icon: imageURL.isEmpty ?CircularProgressIndicator(
-                value: 0.8,
-                valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
-              ):
-              Image.network(imageURL),
-              onPressed:() {
+            GestureDetector(
+              onTap: (){
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const MyProfile()),
                 );
               },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: CircleAvatar(
+                    radius: 22,
+                    backgroundImage:NetworkImage(imageURL)
+
+                  //NetworkImage(imageURL),
+
+                  // child: ClipOval(
+                  //   child:  imageURL.isEmpty ?CircularProgressIndicator(
+                  //     value: 0.8,
+                  //     valueColor: new AlwaysStoppedAnimation<Color>(Colors.purple),
+                  //   ):
+                  //   Image.network(imageURL),
+                  // ),
+                ),
+              ),
             ),
           ],
         ),

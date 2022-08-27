@@ -285,7 +285,7 @@ class Functions {
       ),
     );
   }
-  static StaffContainer(context,staffname, depname, email, gender, address ,country, dob, mobile,salary,type) {
+  static StaffContainer(context,image,staffname, depname, email, gender, address ,country, dob, mobile,salary,type) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
@@ -311,7 +311,7 @@ class Functions {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS785biEGWYfQ3kCbvts_QRuNPn7IJpvovN4A&usqp=CAU'),
+                            backgroundImage: NetworkImage(image),
                           )
                         ],
                       ),

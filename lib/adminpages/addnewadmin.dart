@@ -70,7 +70,7 @@ class _AddNewAdminState extends State<AddNewAdmin> {
   Future uploadImage() async {
     final  posttime = DateTime.now().millisecondsSinceEpoch.toString();
     Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
-    Reference ref = FirebaseStorage.instance.ref().child(Data.newadminuuid).child(posttime);
+    Reference ref = FirebaseStorage.instance.ref().child(Data.newadminuuid).child('adminProfile').child(posttime);
     await ref.putFile(_image!);
     downloadURL = await ref.getDownloadURL();
     DatabaseReference database = FirebaseDatabase.instance.ref();
@@ -124,10 +124,8 @@ class _AddNewAdminState extends State<AddNewAdmin> {
                         foregroundColor: Colors.white,
                       ):CircleAvatar(
                         radius: 40,
-                          backgroundColor: Colors.transparent,
-                          child: ClipOval(
-                            child: Image.file(_image!),
-                          )
+                         backgroundImage: FileImage(_image!),
+
                       ),
                       // CircleAvatar(
                       //   radius: 40,
