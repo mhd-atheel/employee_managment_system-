@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "119634800791",
-    "project_id": "employee-c4be2",
-    "storage_bucket": "employee-c4be2.appspot.com"
+    "project_number": "40903275327",
+    "project_id": "employee-management-syst-21f8b",
+    "storage_bucket": "employee-management-syst-21f8b.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:119634800791:android:5089801dba5469fb6cf9d2",
+        "mobilesdk_app_id": "1:40903275327:android:ab2bc8bc0ce7012523998a",
         "android_client_info": {
           "package_name": "com.example.employee_managment_system"
         }
       },
       "oauth_client": [
         {
-          "client_id": "119634800791-t0dbr7q071qq6n5mr9uo4dtj00ud4fei.apps.googleusercontent.com",
+          "client_id": "40903275327-h1iptqhj8ot7m2mkc1e4mjs9f32a7gcd.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyApWaFf_hq4lP1kfw2rhODsGGEB-EMW0PE"
+          "current_key": "AIzaSyDz9FurLB4QSWBY-i0a_F4D3BxN98byZGA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "119634800791-t0dbr7q071qq6n5mr9uo4dtj00ud4fei.apps.googleusercontent.com",
+              "client_id": "40903275327-h1iptqhj8ot7m2mkc1e4mjs9f32a7gcd.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

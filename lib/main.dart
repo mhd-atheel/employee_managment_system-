@@ -1,19 +1,19 @@
 import 'package:employee_managment_system/adminpages/homepage.dart';
 import 'package:employee_managment_system/adminpages/leaverequest.dart';
+import 'package:employee_managment_system/adminpages/loginpage.dart';
 import 'package:employee_managment_system/employeepages/employee_home.dart';
 import 'package:employee_managment_system/selectingrole.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const SelectRole(),
+      home: const LoginPage(),
     );
   }
 }

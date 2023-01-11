@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:employee_managment_system/data.dart';
 import 'package:employee_managment_system/functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,29 +19,12 @@ class DepartmentPage extends StatefulWidget {
 class _DepartmentPageState extends State<DepartmentPage> {
   TextEditingController departmentcontroller = TextEditingController();
   FirebaseAuth auth = FirebaseAuth.instance;
-  DatabaseReference database = FirebaseDatabase.instance.ref();
   Map departments = {};
   List keys = [];
   bool isLoading = false;
-  load() {
-    database
-        .child('admin')
-        .child(Data.newadminuuid)
-        .child('departments')
-        .once()
-        .then((value) {
-      setState(() {
-        departments = value.snapshot.value as Map;
-        keys = departments.keys.toList();
-      });
-      print(value.snapshot.value);
-      print(keys);
-    });
-  }
 
   @override
   void initState() {
-    load();
     super.initState();
   }
 
@@ -61,128 +45,130 @@ class _DepartmentPageState extends State<DepartmentPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // for(int i=0;i<keys.length;i++)
-            //   Row(
-            //     children: [
-            //       Text(departments[keys[i]]['deparment'].toString()),
-            //       ElevatedButton(onPressed: (){
-            //         database.child('admin').child(Data.newadminuuid).child('departments').child(keys[i]).set(null).then((value) {
-            //           load();
-            //         });
-            //       }, child: Icon(FontAwesomeIcons.trash))
-            //     ],
-            //   )
-            for (int i = 0; i < keys.length; i++)
-              //   Functions.DeparmentContainer(context,departments[keys[i]]['deparment'].toString(),i+1)
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(5)),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body:StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('departments').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Something went wrong'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          return ListView(
+            shrinkWrap: true,
+            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+              Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(),
+                          borderRadius: BorderRadius.circular(5)),
+                      child: Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              departments[keys[i]]['department'].toString(),
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  data['department'],
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              i.toString(),
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 48,
+                                  child: TextButton(
+                                    child: Text('Edit'),
+                                    style: TextButton.styleFrom(
+                                      primary: Colors.white,
+                                      //  padding: EdgeInsets.only(top: 2, bottom: 30, right: 0, left: 0),
+                                      backgroundColor: Color(0xff519557),
+                                      shape: const BeveledRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(3))),
+                                    ),
+                                    onPressed: () {
+                                      print('Pressed');
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 48,
+                                  child: TextButton(
+                                    child: Text('Delete'),
+                                    style: TextButton.styleFrom(
+                                      primary: Colors.white,
+                                      backgroundColor: Color(0xffF14B4B),
+                                      shape: const BeveledRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(0))),
+                                    ),
+                                    onPressed: () {
+                                      // database
+                                      //     .child('admin')
+                                      //     .child(Data.newadminuuid)
+                                      //     .child('departments')
+                                      //     .child(keys[i])
+                                      //     .set(null)
+                                      //     .then((value) {
+                                      //   load();
+                                      // });
+
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 48,
+                                  child: TextButton(
+                                    child: Center(child: Text('More')),
+                                    style: TextButton.styleFrom(
+                                      primary: Colors.white,
+                                      backgroundColor: Color(0xffFA8C5E),
+                                      shape: const BeveledRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              bottomRight: Radius.circular(3))),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MoreInfo()),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 48,
-                              child: TextButton(
-                                child: Text('Edit'),
-                                style: TextButton.styleFrom(
-                                  primary: Colors.white,
-                                  //  padding: EdgeInsets.only(top: 2, bottom: 30, right: 0, left: 0),
-                                  backgroundColor: Color(0xff519557),
-                                  shape: const BeveledRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(3))),
-                                ),
-                                onPressed: () {
-                                  print('Pressed');
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 48,
-                              child: TextButton(
-                                child: Text('Delete'),
-                                style: TextButton.styleFrom(
-                                  primary: Colors.white,
-                                  backgroundColor: Color(0xffF14B4B),
-                                  shape: const BeveledRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(0))),
-                                ),
-                                onPressed: () {
-                                  database
-                                      .child('admin')
-                                      .child(Data.newadminuuid)
-                                      .child('departments')
-                                      .child(keys[i])
-                                      .set(null)
-                                      .then((value) {
-                                    load();
-                                  });
-
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 48,
-                              child: TextButton(
-                                child: Center(child: Text('More')),
-                                style: TextButton.styleFrom(
-                                  primary: Colors.white,
-                                  backgroundColor: Color(0xffFA8C5E),
-                                  shape: const BeveledRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                          bottomRight: Radius.circular(3))),
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MoreInfo()),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              )
-          ],
-        ),
+                    ),
+                  )
+                ],
+              );
+            }).toList(),
+          );
+        },
       ),
+
+
+
+
+
+
     ));
   }
 
@@ -224,16 +210,8 @@ class _DepartmentPageState extends State<DepartmentPage> {
                             child: ElevatedButton(
                                 onPressed: () async {
                                   Data.newadminuuid = auth.currentUser!.uid;
-                                  await database
-                                      .child('admin')
-                                      .child(Data.newadminuuid)
-                                      .child('departments')
-                                      .push()
-                                      .set({
-                                    'department': departmentcontroller.text,
-                                  }).then((value) async {
-                                    Navigator.pop(context);
-                                    load();
+                                  FirebaseFirestore.instance.collection('departments').add({
+                                    'department':departmentcontroller.text
                                   });
                                 },
                                 style: ButtonStyle(
