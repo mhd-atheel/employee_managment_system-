@@ -1,11 +1,10 @@
-import 'dart:ffi';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/utils/utils.dart';
 import 'package:date_time_picker/date_time_picker.dart';
-import 'package:employee_managment_system/main_navigation_pages/staffpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,9 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import '../adminpages/resource.dart';
 import '../data.dart';
 import '../functions.dart';
+import 'package:intl/intl.dart';
 
 class AddNewStaff extends StatefulWidget {
   const AddNewStaff({Key? key}) : super(key: key);
@@ -29,6 +28,7 @@ class _AddNewStaffState extends State<AddNewStaff> {
   XFile? image;
   TextEditingController staffNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
   TextEditingController mobileController = TextEditingController();
   TextEditingController salaryController = TextEditingController();
   TextEditingController addressController = TextEditingController();
@@ -44,40 +44,13 @@ class _AddNewStaffState extends State<AddNewStaff> {
   String? downloadURL;
   DatabaseReference ref = FirebaseDatabase.instance.ref();
   FirebaseAuth auth = FirebaseAuth.instance;
- // @override
-  // void initState() {
-  //   Resource.DepName.forEach((element) {
-  //     menuItems.add(DropdownMenuItem(
-  //         child: Text(element[0]),
-  //       value: element[0],
-  //     )
-  //     );
-  //   });
-  //   super.initState();
-  // }
-  // String selectedValue = Resource.DepName.first[0];
    String dropdownvalue = 'Male';
+    String depValue='';
   var items = [
     'Male',
     'Female',
     'Other',
   ];
-  load() {
-    Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
-    ref
-        .child('admin')
-        .child(Data.newadminuuid)
-        .child('departments')
-        .once()
-        .then((value) {
-      setState(() {
-        departments = value.snapshot.value as Map;
-        keys = departments.keys.toList();
-      });
-      print(value.snapshot.value);
-      print(keys);
-    });
-  }
   Future ImagePickerMethod() async{
     final pick =await imagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -107,13 +80,6 @@ class _AddNewStaffState extends State<AddNewStaff> {
     final snackBar = SnackBar(content: Text(SnackText),duration: d,);
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-  @override
-  void initState() {
-    load();
-    super.initState();
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -190,41 +156,53 @@ class _AddNewStaffState extends State<AddNewStaff> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  height: 60,
-                  width:MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                   // color: Colors.white,
-                    borderRadius: BorderRadius.circular(5),),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DropdownButton(
-                     dropdownColor: Colors.white,
-                      underline: DropdownButtonHideUnderline(child: Container()),
-                      value: dropdownvalue,
-                      iconDisabledColor: Colors.transparent,
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      isExpanded: true,
-                      items: items.map((String items) {
-                        return DropdownMenuItem(
-                          value: items,
-                          child: Text(items),
-
-                        );
-                      }).toList(),
-                      onChanged: (String? Value) {
-                        setState(() {
-                          dropdownvalue = Value!;
-                          gender = Value;
-                          print(Value);
-                        });
-                      },
+              StreamBuilder(
+                stream: FirebaseFirestore.instance.collection('departments').snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Something went wrong'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      height: 60,
+                      width:MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                        // color: Colors.white,
+                        borderRadius: BorderRadius.circular(5),),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButton(
+                          hint: Text('Select Department',style: TextStyle(color: Colors.black),),
+                          dropdownColor: Colors.white,
+                          underline: DropdownButtonHideUnderline(child: Container()),
+                          value: 'frontend',
+                          iconDisabledColor: Colors.transparent,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          isExpanded: true,
+                          items: snapshot.data!.docs.map((DocumentSnapshot document) {
+                            Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                            return DropdownMenuItem(
+                              value: data['department'],
+                              child: Text(data['department']),
+                            );
+                          }).toList(),
+                          onChanged: (Object? Value) {
+                            setState(() {
+                              depValue = Value!.toString();
+                              // gender = Value;
+                              print(Value);
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -239,6 +217,37 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 child: TextFormField(
                   onChanged: (val){print(val);},
                   controller: emailController,
+                  keyboardType:TextInputType.emailAddress,
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black,
+
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Text("Password:-"),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextFormField(
+                  onChanged: (val){print(val);},
+                  controller: passwordController,
                   keyboardType:TextInputType.emailAddress,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
@@ -570,34 +579,32 @@ class _AddNewStaffState extends State<AddNewStaff> {
                 padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 8.0),
                 child: ElevatedButton(
                     onPressed: () async{
+
                       Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
                       final  posttime = DateTime.now().millisecondsSinceEpoch.toString();
-                      // Data.newadminuuid = FirebaseAuth.instance.currentUser!.uid;
                       Reference database = FirebaseStorage.instance.ref().child(Data.newadminuuid).child('staffProfile').child(posttime);
                       await database.putFile(_image!);
                       downloadURL = await database.getDownloadURL();
+                     await FirebaseAuth.instance.createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text).then((value) {
+                         FirebaseFirestore.instance.collection('staffData').add({
+                         'staffName':staffNameController.text,
+                         'email':emailController.text,
+                         'mobileNumber':mobileController.text,
+                         'address':addressController.text,
+                         'department':depValue,
+                         'dob':dob,
+                         'gender':gender,
+                         'salary':salaryController.text,
+                         'country':country,
+                         'type': Functions.index == 0 ?type = "Per day":type="Per Month",
+                         'image': downloadURL,
+                         'password': passwordController.text,
+                         'userType': 'user',
+                       }).then((value){
+                         print('added');
+                       });
+                     });
 
-                      // database.child('admin').child(Data.newadminuuid).child('staffprofileimage').set({
-                      //   'downloadurl': downloadURL
-                      // });
-                      // print(downloadURL);
-                     await ref.child('admin').child(Data.newadminuuid).child('staffs').push().set({
-                        'staffName':staffNameController.text,
-                        'email':emailController.text,
-                        'mobileNumber':mobileController.text,
-                        'address':addressController.text,
-                        'department':department,
-                        'dob':dob,
-                        'gender':gender,
-                        'salary':salaryController.text,
-                        'country':country,
-                        'type': Functions.index == 0 ?type = "Per day":type="Per Month",
-                        'image': downloadURL,
-                      }).then((value) {
-                        Navigator.pop(context);
-                      });
-                      print("presseds");
-                     await uploadImage();
                       },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.black),

@@ -1,7 +1,10 @@
 import 'package:employee_managment_system/adminpages/homepage.dart';
+import 'package:employee_managment_system/data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/loading.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -64,6 +67,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                     onPressed: () async {
                       if (_key.currentState!.validate()) {
+                        setState(() {
+                          Variable.isLoading = true;
+                        });
                         try {
                           FirebaseAuth.instance.signInWithEmailAndPassword(
                               email: emailController.text, password: passwordController.text).then((value) {
@@ -71,6 +77,9 @@ class _LoginPageState extends State<LoginPage> {
                               context,
                               MaterialPageRoute(builder: (context) => const HomePage()),
                             );
+                            setState(() {
+                              Variable.isLoading = false;
+                            });
                           });
                         } on FirebaseAuthException catch (error) {
                           errorMessage = error.message!;
@@ -86,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.black,
                         height: 50,
                         width: MediaQuery.of(context).size.width,
-                        child: Center(child: Text("Login")))),
+                        child: Center(child:Variable.isLoading==false?Text("Login"):Loading.loading()))),
               ),
             ],
           ),

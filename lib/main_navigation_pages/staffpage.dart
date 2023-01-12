@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:employee_managment_system/data.dart';
 import 'package:employee_managment_system/main_navigation_pages/addnewstaff.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../functions.dart';
 import '../adminpages/resource.dart';
+import 'moreinfo.dart';
 
 class StaffPage extends StatefulWidget {
   const StaffPage({Key? key}) : super(key: key);
@@ -61,31 +63,232 @@ class _StaffPageState extends State<StaffPage> {
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 10,
-              ),
-              // Functions.StaffContainer(context)
-              for (int i = 0; i < keys.length; i++)
-                // for(int i=0;i<Resource.StaffInfo.length;i++)
-                Functions.StaffContainer(
-                    context,
-                    staffs[keys[i]]['image'],
-                    staffs[keys[i]]['staffName'].toString(),
-                    staffs[keys[i]]['department'].toString(),
-                    staffs[keys[i]]['email'].toString(),
-                    staffs[keys[i]]['gender'].toString(),
-                    staffs[keys[i]]['address'].toString(),
-                    staffs[keys[i]]['country'].toString(),
-                    staffs[keys[i]]['dob'].toString(),
-                    staffs[keys[i]]['mobileNumber'].toString(),
-                    staffs[keys[i]]['salary'].toString(),
-                    staffs[keys[i]]['type'].toString(),
-                )
-            ],
-          ),
+        body: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('staffData').snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return Center(child: Text('Something went wrong'));
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            return ListView(
+              shrinkWrap: true,
+              children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                return Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            border: const Border(
+                              bottom: BorderSide(),
+                            )),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(5.0, 0.0,0,0),
+
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage(data['image']),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                data['staffName'],
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                data['department'] ,
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w300,
+                                                    fontSize: 10),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: 48,
+                                      width: 80,
+                                      child: TextButton(
+                                        child: FaIcon(FontAwesomeIcons.penToSquare),
+                                        style: TextButton.styleFrom(
+                                          primary: Colors.white,
+                                          //  padding: EdgeInsets.only(top: 2, bottom: 30, right: 0, left: 0),
+                                          backgroundColor: Color(0xff519557),
+                                          shape: const BeveledRectangleBorder(
+                                              borderRadius: BorderRadius.only(
+                                                  bottomLeft: Radius.circular(0))),
+                                        ),
+                                        onPressed: () {
+                                          print('Pressed');
+                                        },
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 48,
+                                      width: 80,
+                                      child: TextButton(
+                                        child: FaIcon(FontAwesomeIcons.trash),
+                                        style: TextButton.styleFrom(
+                                          primary: Colors.white,
+                                          //  padding: EdgeInsets.only(top: 2, bottom: 30, right: 0, left: 0),
+                                          backgroundColor: Color(0xffF14B4B),
+                                          shape: const BeveledRectangleBorder(
+                                              borderRadius: BorderRadius.only(
+                                                  bottomLeft: Radius.circular(0),
+                                                  topRight: Radius.circular(0))),
+                                        ),
+                                        onPressed: () {
+                                          print('Pressed');
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ), // row
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      "EMAIL: ",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                    Text(data['email'])
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "GENDER: ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(data['gender'])
+                              ],
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "ADDRESS : ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Expanded(child: Text(data['address']))
+                              ],
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "COUNTRY : ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Expanded(child: Text(data['country']))
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "DOB : ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(data['dob'])
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "MOBILE NO : ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(data['mobileNumber'])
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "SALARY :",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(data['salary']+ " \$")
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "SALARY TYPE: ",
+                                  style:
+                                  TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                                Text(data['type'])
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ]),
+                  ),
+                );
+              }).toList(),
+            );
+          },
         ),
       ),
     );
